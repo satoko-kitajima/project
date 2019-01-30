@@ -1,0 +1,97 @@
+# ！注意！ このファイルは文字コード：UTF8、改行コード：LFで記述してください
+# 書式
+# キー文字列 : リソース文字列
+# キー文字列とリソース文字列は「 : 」（半角スペース半角コロン半角スペース）で区切って記述してください
+# キー文字列はこのファイル内で重複しない「半角数字」から構成された文字列としてください
+# 「#」（半角シャープ）で開始する行はコメント行となります
+
+# 詳細ページURL
+000000 : <h1 class=['"]project-title['"]>[\s\r\n]*<a[^>]+>
+000001 : .*href=["']
+000002 : https://www.wantedly.com
+000003 : \?.*
+
+# 次ページ遷移
+100000 : 募集が見つかりませんでした
+100001 : <a[^>]*/projects/[^>]*page[^>]*>次へ
+100002 : ['"].*
+100003 : &amp;
+100004 : &
+
+# corp_address
+201000 : <div class='company-icon wt-icon wt-icon-location'></div>.*?</div>
+201001 : <[^>]+>
+201002 : [\r\n\s\t]+
+
+# corp_id
+202000 : </span>[\r\n\s]*<a href=['"]/companies/[^'"]+
+202001 : .*/
+
+# crawl_date_time
+203000 : html
+203001 : html
+
+# detail_page_url
+204000 : <meta property=['"]og:url['"] content=['"][^'"]+
+204001 : .*['"]
+
+# emp_type
+205000 : alt="Business bag".*?</div>
+205001 : ^.*?<div class='summary'>
+205002 : <[^>]+>
+205003 : [\r\n\s\t]+
+
+# establish
+206000 : <div class='company-icon icon-flag'></div>.*?</div>
+206001 : に設立
+206002 : <[^>]+>
+206003 : [\r\n\s\t]+
+
+# expire_date
+207000 : <i class=['"]icon-time['"]></i>[^<]+
+207001 : <i class=['"]icon-time['"]></i>[\r\n]*
+
+# industry
+208000 : <span class=['"]caption[^>]*['"]>[^<]+
+208001 : .*>
+208002 : \s+
+208003 :  
+
+# job_class
+209000 : <meta name=['"]description['"] content=['"][^'"]+
+
+# job_name
+210000 : <div class='job-type-label[^>]*>.*?</div>|<span class='job-type-tag[^>]*>.*?</span>
+210001 : <[^>]+>
+210002 : [\r\n\s\t]+
+
+# president
+211000 : <td class=['"]head['"]>創業者</td>.*?</td>
+
+# staff_num
+212000 : <div class='company-icon icon-group'></div>.*?</div>
+212001 : のメンバー
+212002 : <[^>]+>
+212003 : [\r\n\s\t]+
+
+# was_expired
+213000 : 募集終了しました</a>
+
+# window_name
+214000 : <a href=['"]/companies/[^>]*>[^<]+</a>[\s\r\n]*</h2>
+214001 : <[^>]+>
+
+# hp_url
+215000 : <div class='company-icon wt-icon wt-icon-link'></div>.*?</div>
+215001 : <[^>]+>
+215002 : [\r\n\s\t]+
+
+# hp_url
+216001 : この募集は、現在非公開です</h3>
+
+# company_value_title
+#217000 : <div class='company-value-title'>.*?</div>
+#217001 : <[^>]+>
+#217002 : [\r\n\s\t]*
+
+# 888888 : 
