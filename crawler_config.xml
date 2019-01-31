@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+
+<http_client_resource>
+
+    <http_client
+        name="selenium"
+        type="selenium"
+        timeout_second="180"
+        accept_insecure_certs="true"
+        check_http_status="true"
+        allow_redirect="true"
+        window_size_xy_csv="1280,1024"
+        is_headless="true"
+    />
+
+    <http_client
+        name="jsoup"
+        type="jsoup"
+        timeout_second="180"
+        accept_insecure_certs="true"
+        check_http_status="true"
+        allow_redirect="true"
+        use_dom="false"
+        user_agent_resource_key="888888"
+    />
+
+</http_client_resource>
+
+<transform_resource>
+    <transform name="replace_cr_or_lf_to_blank" type="replace" force_apply_type="post">
+        <replace from="[\r\n]" order="1" />
+    </transform>
+    <transform name="replace_tab_to_blank" type="replace" force_apply_type="post">
+        <replace from="\t" order="1" />
+    </transform>
+    <transform name="trim_wide" type="trim" force_apply_type="POST" />
+    <transform name="unescape_html" type="unescape" transform_type="html" force_apply_type="post" />
+</transform_resource>
+
+<page_resource>
+
+    <page name="dummy_1" order="1">
+        <action name="cleanup_new_detail_page_url" />
+    </page>
+
+    <page name="selenium_login" http_client="selenium" order="2" source="https://www.wantedly.com">
+        <wait select_type="css_selector" select_by="a.ui-show-modal:nth-child(1)" />
+        <action name="display_login_form" order="1" />
+        <action name="fill_login_info_1" order="2" />
+        <action name="fill_login_info_2" order="3" />
+        <action name="click_login_button" order="4" />
+    </page>
+
+    <page name="recent_reqruit_list"
+        http_client="jsoup"
+        order="3"
+        source="file:///opt/jobdirect/competitor_research/target/www.wantedly.com/data/recent_reqruit_list_url_list.txt">
+        <analyze name="new_detail_page_url" />
+        <action name="open_next_page_url" order="1" />
+    </page>
+
+    <page name="dummy_2" order="4">
+        <action name="merge_new_detail_page_url" />
+    </page>
+
+    <page name="dummy_3" order="5">
+        <action name="insert_target_root_page" />
+    </page>
+
+    <page name="detail_page" order="6" http_client="jsoup" storage="source_url_storage">
+        <analyze name="corp_address" />
+        <analyze name="corp_id" />
+        <analyze name="crawl_date_time" />
+        <analyze name="detail_page_url" />
+        <analyze name="emp_type" />
+        <analyze name="establish" />
+        <analyze name="expire_date" />
+        <analyze name="industry" />
+        <analyze name="job_class" />
+        <analyze name="job_name" />
+        <analyze name="president" />
+        <analyze name="staff_num" />
+        <analyze name="was_expired" />
+        <analyze name="window_name" />
+        <analyze name="hp_url" />
+        <analyze name="was_expired_hikoukai" />
+        <analyze name="company-value-title" />
+    </page>
+
+</page_resource>
+
+<action_resource>
+<!-- cleanup_new_detail_page_url action -->
+    <action name="cleanup_new_detail_page_url" type="sql" value="/opt/jobdirect/competitor_research/target/www.wantedly.com/cleanup_new_detail_page_url.sql" storage="new_detail_page_url_storage" />
+
+<!-- login action -->
+    <action name="display_login_form" type="click">
+        <target select_type="css_selector" select_by="a.ui-show-modal:nth-child(1)" />
+        <wait name="login_button_is_displayed" />
+    </action>
+    <action name="fill_login_info_1" type="fill">
+        <target select_type="id" select_by="login_user_email" value_type="static" value="onji.jd@gmail.com" />
+    </action>
+    <action name="fill_login_info_2" type="fill" save_cache="false">
+        <target select_type="id" select_by="login_user_password" value_type="static" value="Rephlex123!" />
+    </action>
+    <action name="click_login_button" type="click">
+        <target select_type="css_selector" select_by="input.wt-ui-button:nth-child(1)" />
+    </action>
+
+<!-- open next page url action -->
+    <action name="open_next_page_url" type="open_while" filter="has_next_page_url">
+        <target value_type="analyze" value="next_page_url" />
+        <analyze name="new_detail_page_url" />
+    </action>
+
+<!-- merge new detail page url action -->
+    <action name="merge_new_detail_page_url" type="sql" value="/opt/jobdirect/competitor_research/target/www.wantedly.com/merge_new_detail_page_url.sql" storage="new_detail_page_url_storage" />
+
+<!-- insert target root page action -->
+    <action name="insert_target_root_page" type="sql" value="/opt/jobdirect/competitor_research/target/www.wantedly.com/insert_target_root_page.sql" storage="new_detail_page_url_storage" />
+
+</action_resource>
+
+<analyze_resource>
+<!-- default -->
+    <default storage="analyzed_data_storage" />
+
+<!-- login analyze -->
+    <analyze name="login_button_is_displayed" type="visibility" select_type="css_selector" select_by="input.wt-ui-button:nth-child(1)" />
+
+<!-- new detail page url analyze -->
+    <analyze name="new_detail_page_url" type="string" match_type="all" value_resource_key="000000" storage="new_detail_page_url_storage">
+        <replace from_resource_key="000001" to_resource_key="000002" order="1" />
+        <replace from_resource_key="000003" order="2" />
+    </analyze>
+
+<!-- open next page url analyze -->
+    <analyze name="has_next_page_url" type="boolean_negate" value_resource_key="100000" />
+    <analyze name="next_page_url" type="string" match_type="first" value_resource_key="100001">
+        <replace from_resource_key="000001" to_resource_key="000002" order="1" />
+        <replace from_resource_key="100002" order="2" />
+        <replace from_resource_key="100003" to_resource_key="100004" order="3" />
+    </analyze>
+
+<!-- detail page analyze -->
+    <analyze name="corp_address" type="string" match_type="first" value_resource_key="201000">
+        <replace from_resource_key="201001" order="1" />
+        <replace from_resource_key="201002" order="2" />
+    </analyze>
+    <analyze name="corp_id" type="string" match_type="first" value_resource_key="202000">
+        <replace from_resource_key="202001" order="1" />
+    </analyze>
+    <analyze name="crawl_date_time" type="string" match_type="first" value_resource_key="203000">
+        <replace from_resource_key="203001" order="1" />
+    </analyze>
+    <analyze name="detail_page_url" type="string" match_type="first" value_resource_key="204000">
+        <replace from_resource_key="204001" order="1" />
+    </analyze>
+    <analyze name="emp_type" type="string" match_type="first" value_resource_key="205000">
+        <replace from_resource_key="205001" order="1" />
+        <replace from_resource_key="205002" order="2" />
+        <replace from_resource_key="205003" order="3" />
+    </analyze>
+    <analyze name="establish" type="string" match_type="first" value_resource_key="206000">
+        <replace from_resource_key="206001" order="1" />
+        <replace from_resource_key="206002" order="2" />
+        <replace from_resource_key="206003" order="3" />
+    </analyze>
+    <analyze name="expire_date" type="string" match_type="first" value_resource_key="207000">
+        <replace from_resource_key="207001" order="1" />
+    </analyze>
+    <analyze name="industry" type="string" match_type="all" value_resource_key="208000">
+        <replace from_resource_key="208001" order="1" />
+        <replace from_resource_key="208002" to_resource_key="208003" order="1" />
+    </analyze>
+    <analyze name="job_class" type="string" match_type="first" value_resource_key="209000">
+        <replace from_resource_key="204001" order="1" />
+    </analyze>
+    <analyze name="job_name" type="string" match_type="first" value_resource_key="210000">
+        <replace from_resource_key="210001" order="1" />
+        <replace from_resource_key="210002" order="2" />
+    </analyze>
+    <analyze name="president" type="string" match_type="first" value_resource_key="211000">
+        <replace from_resource_key="205001" order="1" />
+        <replace from_resource_key="205002" order="2" />
+    </analyze>
+    <analyze name="staff_num" type="string" match_type="first" value_resource_key="212000">
+        <replace from_resource_key="212001" order="1" />
+        <replace from_resource_key="212002" order="2" />
+        <replace from_resource_key="212003" order="3" />
+    </analyze>
+    <analyze name="was_expired" type="boolean" value_resource_key="213000" />
+    <analyze name="window_name" type="string" match_type="first" value_resource_key="214000">
+        <replace from_resource_key="214001" order="1" />
+        <replace from_resource_key="210001" order="2" />
+    </analyze>
+    <analyze name="hp_url" type="string" match_type="first" value_resource_key="215000">
+        <replace from_resource_key="215001" order="1" />
+        <replace from_resource_key="215002" order="2" />
+    </analyze>
+    <analyze name="was_expired_hikoukai" type="boolean" value_resource_key="216001" />
+    <analyze name="wd_test" type="string" match_type="first" value_resource_key="209000">
+        <replace from_resource_key="204001" order="1" />
+    </analyze>
+    <analyze name="company-value-title" type="string" match_type="first" value_resource_key="217000">
+        <replace from_resource_key="205001" order="1" />
+        <replace from_resource_key="205002" order="2" />
+    </analyze>
+
+</analyze_resource>
+
+<storage_resource>
+<!--
+
+    <storage name="new_detail_page_url_storage" type="oracle10" location="t_wantedly_new_detail_url@@jdbc:oracle:thin:kensaku/kensaku@10.10.10.72:1521:CHUTO13" />
+
+    <storage name="source_url_storage" type="oracle10" location="t_target_root_page@@jdbc:oracle:thin:kensaku/kensaku@10.10.10.72:1521:CHUTO13" />
+    <storage name="analyzed_data_storage" type="oracle10" location="t_target_data@@jdbc:oracle:thin:kensaku/kensaku@10.10.10.72:1521:CHUTO13" />
+
+-->
+    <storage name="new_detail_page_url_storage" type="oracle10" location="t_wantedly_new_detail_url@@jdbc:oracle:thin:kensaku/kensaku@10.10.10.100:1521:TRAVELR2" />
+    <storage name="source_url_storage" type="oracle10" location="t_target_root_page@@jdbc:oracle:thin:kensaku/kensaku@10.10.10.100:1521:TRAVELR2" />
+    <storage name="analyzed_data_storage" type="oracle10" location="t_target_data@@jdbc:oracle:thin:kensaku/kensaku@10.10.10.100:1521:TRAVELR2" />
+</storage_resource>
+
+</root>
